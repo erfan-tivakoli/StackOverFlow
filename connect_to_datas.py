@@ -1,19 +1,18 @@
-from Badge import Badge
-
 __author__ = 'Rfun'
+
 import os
 import re
 from User import *
 from Question import *
 from Answer import *
 from tqdm import tqdm
-from matplotlib import pyplot as plt
 import pickle
 from Badge import *
 
 
 def read_datas():
-    for file_name in tqdm(os.listdir('./Sample_datas')[:12]):
+
+    for file_name in tqdm(os.listdir('./Sample_datas')):
         with open('Sample_datas/' + file_name) as f:
             lines = f.readlines()
             file_infos = re.split('\.|\_', file_name)
@@ -29,7 +28,7 @@ def read_datas():
                         question_infos = re.split('\-|\,', line)
                         question = get_question_by_id(question_infos[0])
                         if question is None:
-                            question = Question(question_infos[0], question_infos[1], user)
+                            question = Question(question_infos[0], question_infos[1], user, question_infos[2])
                         user.add_question(question)
                 elif file_infos[1] == 'a':
                     for line in lines:
@@ -39,7 +38,9 @@ def read_datas():
                             answer = Answer(answer_infos[0], answer_infos[1], answer_infos[2], user)
                         user.add_answer(answer)
 
-    for file_name in tqdm(os.listdir('./Sample_datas')[:12]):
+    print(Answer.ids_index)
+
+    for file_name in tqdm(os.listdir('./Sample_datas')):
         with open('Sample_datas/' + file_name) as f:
             lines = f.readlines()
             file_infos = re.split('\.|\_', file_name)
@@ -65,11 +66,11 @@ def read_datas():
                         line_infos = re.split('\:', line)
                         answer = get_answer_by_id(line_infos[0])
                         for item in re.split('\;', line_infos[1]):
-                            question_infos = re.split('\-', item)
+                            question_infos = re.split('\-|\,', item)
                             question = get_question_by_id(question_infos[0])
                             user = get_user_by_id(question_infos[1])
                             if question is None:
-                                question = Question(question_infos[1], question_infos[2], user)
+                                question =  (question_infos[1], question_infos[2], user, question_infos[3])
                             answer.add_past_question(question)
     for file_name in os.listdir('./Badge_infos'):
         with open('./Badge_infos/' + file_name, 'r+') as f:
@@ -86,12 +87,16 @@ def read_datas():
 def main():
     read_datas()
 
-    with open('./pickled/users.pkl', 'wb') as f:
-        pickle.dump(User.instances, f, protocol=2)
-    with open('./pickled/quesions.pkl', 'wb') as f:
-        pickle.dump(Question.instances, f, protocol=2)
-    with open('./pickled/answers.pkl', 'wb') as f:
-        pickle.dump(Answer.instances, f, protocol=2)
+    for i in tqdm(range(10)):
+        with open('./pickled/users_'+str(i)+'.pkl', 'wb') as f:
+            temp = len(User.instances)
+            pickle.dump(User.instances[int(temp*i/10) : int(temp*(i+1)/10)], f)
+        with open('./pickled/questions_'+str(i)+'.pkl', 'wb') as f:
+            temp = len(Question.instances)
+            pickle.dump(Question.instances[int(temp*i/10) : int(temp*(i+1)/10)], f)
+        with open('./pickled/answers_'+str(i)+'.pkl', 'wb') as f:
+            temp = len(Answer.instances)
+            pickle.dump(Answer.instances[int(temp*i/10) : int(temp*(i+1)/10)], f)
 
 
 if __name__ == '__main__':

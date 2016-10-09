@@ -2,13 +2,18 @@ __author__ = 'Rfun'
 
 class User:
     instances = []
+    ids_index = {}
 
     def __init__(self, id):
+        #TODO : add the interest and experties here
         self.id = id
         self.questions = []
         self.answers = []
         self.badges = []
         User.instances.append(self)
+        User.ids_index[self.id] = len(User.instances) - 1
+        self.interests = {}
+        self.experties = {}
 
     def add_question(self, question):
         self.questions.append(question)
@@ -24,7 +29,7 @@ class User:
 
 
 def get_user_by_id(id):
-    for user in User.instances:
-        if user.get_id() == id:
-            return user
-    return None
+    try:
+        return User.instances[User.ids_index[id]]
+    except:
+        return None
